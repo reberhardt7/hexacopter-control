@@ -54,36 +54,60 @@ class Copter:
     def disarm( self ):
         self.mavSerial.arducopter_disarm( )
 
-    def isArmed( self ):
+    @property
+    def armed( self ):
         return self.mavSerial.motors_armed( )
 
-    def getAngle( self ):
+    @property
+    def hasAngle( self ):
+        if ( self.pitch != 0 or self.roll != 0 or self.yaw != 0 ):
+            return True
+        else:
+            return False
+    
+    @property
+    def angle( self ):
         return ( self.pitch, self.roll, self.yaw );
 
-    def getAngVel( self ):
+    @property
+    def angVel( self ):
         return ( self.pitchVel, self.rollVel, self.yawVel );
+
+    @property
+    def hasGPS( self ):
+        if ( self.gpsLat != 0 or self.gpsLon != 0 ):
+            return True
+        else:
+            return False
     
-    def getGPS( self ):
+    @property
+    def GPS( self ):
         return ( self.gpsLat, self.gpsLon, self.gpsAlt );
 
-    def getStartTime( self ):
+    @property
+    def startTime( self ):
         return self.mavSerial.start_time
 
-    def getUptime( self ):
+    @property
+    def uptime( self ):
         return self.mavSerial.uptime
-    
-    def getFlightMode( self ):
+
+    @property
+    def flightMode( self ):
         return self.mavSerial.flightmode
 
-    def getGroundPressure( self ):
+    @property
+    def groundPressure( self ):
         return self.mavSerial.ground_pressure
 
-    def getGroundTemp( self ):
+    @property
+    def groundTemp( self ):
         return self.mavSerial.ground_temperature
 
-    def getAltitude( self ):
+    @property
+    def altitude( self ):
         return self.mavSerial.altitude
-    
+
     def receiveMessage( self ):
         msg = self.mavSerial.recv_match( blocking = False )
 
@@ -97,9 +121,9 @@ class Copter:
                 self.rollVell = msg.rollspeed
                 
             if ( msg.get_type( ) == "GLOBAL_POSITION_INT" ):
-                self.gpsLat = msg.lat
-                self.gpsLon = msg.lon
-                self.gpsAlt = msg.alt
+                self.gpsLat = msg.lat / 1.0e7
+                self.gpsLon = msg.lon / 1.0e7
+                self.gpsAlt = msg.alt / 1.0e3
                 self.gpsHeading = msg.hdg
         
         return msg
