@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import os, sys
-import config, copter
+import config, copter, flightmode
 
 print( '---===HSOE Copter===---' )
 
@@ -11,6 +11,9 @@ copter.arm( )
 
 running = True
 lastBad = False
+
+copter.flightMode = flightmode.Guided
+copter.flyTo( 0, 0, 50 )
 
 while running == True:
     try:

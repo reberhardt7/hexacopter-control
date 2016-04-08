@@ -4,6 +4,7 @@
 # https://github.com/mavlink/mavlink
 
 from pymavlink import mavutil
+import flightmode
 
 class Copter:
     def __init__( self, serial, baud ):
@@ -54,6 +55,34 @@ class Copter:
     def disarm( self ):
         self.mavSerial.arducopter_disarm( )
 
+    def modeNumber( self, modeName ):
+        modeMap = self.mav.mode_mapping( )
+
+        if modeName not in modeMap:
+            return -1
+
+        return modeMap[ modeName ]
+
+    def flyTo( self, lat, lon, altitude ):
+        if ( self.flightMode == flightmode.Guided ):
+            self.mav.mission_item_send( self.mavSerial.target_system,
+                                        self.mavSerial.target_component, 0,
+                                        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                                        mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,
+                                        2, 0, 0, 0, 0, 0,
+                                        lat, lon, altitude )
+        else:
+            print( "Cannot fly to location because not in guided mode" )
+        
+    
+    @property
+    def flightMode( self ):
+        return self.mav.flightmode
+
+    @flightMode.setter
+    def flightMode( self, flightName ):
+        self.mav.set_mode( modeNumber( flightName ) )
+    
     @property
     def armed( self ):
         return self.mavSerial.motors_armed( )
